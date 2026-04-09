@@ -54,8 +54,9 @@ app.get("/top-minter-fees", async (req, res) => {
 // ✅ REWARD POOL
 app.get("/reward-pool", async (req, res) => {
   try {
-    const data = await fetchWithCache("rewardPool", "6946334");
-    res.json(data);
+    const data = await fetchWithCache("rewardPool", "6971514");
+    const value = Number(data[0]?.balance || 0).toFixed(4);
+    res.json({ total_reward_pool: parseFloat(value) });
   } catch (err) {
     console.error(err);
     if (cache.rewardPool.data) return res.json(cache.rewardPool.data);
@@ -66,8 +67,9 @@ app.get("/reward-pool", async (req, res) => {
 // ✅ REGISTRATION FEES
 app.get("/reg-fees", async (req, res) => {
   try {
-    const data = await fetchWithCache("regFees", "6946769");
-    res.json(data);
+    const data = await fetchWithCache("regFees", "6971568");
+    const value = Number(data[0]?.total_reg_fees || 0).toFixed(4);
+    res.json({ total_reg_fees: parseFloat(value) });
   } catch (err) {
     console.error(err);
     if (cache.regFees.data) return res.json(cache.regFees.data);
@@ -78,8 +80,9 @@ app.get("/reg-fees", async (req, res) => {
 // ✅ GAS FEES
 app.get("/gas-fees", async (req, res) => {
   try {
-    const data = await fetchWithCache("gasFees", "6946700");
-    res.json(data);
+    const data = await fetchWithCache("gasFees", "6971541");
+    const value = Number(data[0]?.total_gas_fees || 0).toFixed(4);
+    res.json({ total_gas_fees: parseFloat(value) });
   } catch (err) {
     console.error(err);
     if (cache.gasFees.data) return res.json(cache.gasFees.data);
