@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-const DUNE_API_KEY = "YOUR_API_KEY"; // keep your real key here
+const DUNE_API_KEY = "cVH3KXu8SFnF17Cwut5Ueac0BHiNxJ9l"; // keep your real key here
 
 // ✅ CACHE SETUP - 6 hours
 let cache = {
