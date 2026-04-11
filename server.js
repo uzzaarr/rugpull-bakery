@@ -84,7 +84,7 @@ app.get("/gas-fees", async (req, res) => {
 // ✅ AIRDROP + PROFIT/LOSS PER USER
 app.get("/airdrop", async (req, res) => {
   try {
-    const data = await fetchOnce("airdrop", "6978317");
+   const data = await fetchOnce("airdrop", "6982387");
     res.json(data);
   } catch (err) {
     console.error(err);

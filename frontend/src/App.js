@@ -9,9 +9,11 @@ const BASE_URL = "https://rugpull-bakery.onrender.com";
 
 function App() {
   const [data, setData] = useState([]);
+  const [airdropData, setAirdropData] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [chartData, setChartData] = useState(null);
+  const [airdropSummary, setAirdropSummary] = useState(null);
 
   useEffect(() => {
     // Fetch top minters
@@ -27,6 +29,21 @@ function App() {
       })
       .catch((err) => console.error(err));
 
+    // Fetch airdrop per user
+    axios.get(`${BASE_URL}/airdrop`)
+      .then((res) => {
+        const cleaned = res.data.map((item) => ({
+          rank: item.rank,
+          user_address: (item.user_address || "").toLowerCase(),
+          total_eth_spent: Number(item.total_eth_spent || 0),
+          tx_count: item.tx_count || 0,
+          airdrop_received: Number(item.airdrop_received || 0),
+          net_profit: Number(item.net_profit || 0),
+        }));
+        setAirdropData(cleaned);
+      })
+      .catch((err) => console.error(err));
+
     // Fetch chart summary data
     Promise.all([
       axios.get(`${BASE_URL}/reward-pool`),
@@ -39,16 +56,37 @@ function App() {
       const totalFees = regFees + gasFees;
       setChartData({ rewardPool, regFees, gasFees, totalFees });
     }).catch((err) => console.error(err));
+
+    // Fetch airdrop summary
+    axios.get(`${BASE_URL}/airdrop-summary`)
+      .then((res) => setAirdropSummary(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
-  const filtered = data.filter((user) =>
+  // Search from airdrop data (has all columns)
+  const filtered = airdropData.filter((user) =>
     user.user_address.includes(search.toLowerCase())
   );
 
   const totalETH = data.reduce((acc, u) => acc + u.total_eth_spent, 0);
 
-  // Cookie donut chart colors
+  const AIRDROP_COLORS = {
+    "Recovered ✅": "#4caf50",
+    "Net Loss 🔴": "#ff5a5a",
+    "Rugged 💀": "#888888",
+  };
 
+  const getStatusColor = (netProfit) => {
+    if (netProfit > 0) return "#4caf50";
+    if (netProfit === 0) return "#888888";
+    return "#ff5a5a";
+  };
+
+  const getStatusLabel = (user) => {
+    if (user.airdrop_received === 0) return "💀 Rugged";
+    if (user.net_profit > 0) return "✅ Recovered";
+    return "🔴 Net Loss";
+  };
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial", background: "#f5d6c6", minHeight: "100vh", color: "#333" }}>
@@ -74,43 +112,81 @@ function App() {
         </p>
       </div>
 
-      {/* 🍪 COOKIE DONUT CHART — Rewards vs Fees */}
-      {chartData && (
-        <div style={{
-          background: "#fff",
-          borderRadius: "20px",
-          padding: "30px",
-          marginBottom: "40px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          textAlign: "center"
-        }}>
-          <h2 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(10px, 1.5vw, 14px)", marginBottom: "10px" }}>
-            🍪 Rewards vs Fees
-          </h2>
-          <p style={{ color: "#888", fontSize: "13px", marginBottom: "20px" }}>
-            Total Fees Collected: <strong>{chartData.totalFees.toFixed(2)} ETH</strong> &nbsp;|&nbsp;
-            Reward Pool: <strong>{chartData.rewardPool.toFixed(2)} ETH</strong>
-          </p>
+      {/* 🍪 TWO COOKIE CHARTS SIDE BY SIDE */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", marginBottom: "40px", justifyContent: "center" }}>
 
-          <div style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "20px" }}>
-            
-            {/* LEFT STAT — Reg Fees */}
-            <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "13px", color: "#666" }}>Registration Fees</p>
-              <p style={{ fontSize: "24px", fontWeight: "900", color: "#ff5a5a" }}>{chartData.regFees.toFixed(2)} ETH</p>
+        {/* LEFT COOKIE — Airdrop Analysis */}
+        {airdropSummary && (
+          <div style={{ background: "#fff", borderRadius: "20px", padding: "30px", flex: "1", minWidth: "280px", maxWidth: "480px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", textAlign: "center" }}>
+            <h2 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(9px, 1.3vw, 12px)", marginBottom: "20px" }}>
+              🍪 Airdrop Analysis
+            </h2>
+
+            {/* CUSTOM LEGEND */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap", marginBottom: "10px" }}>
+              {airdropSummary.map((d, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                  <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: AIRDROP_COLORS[d.status] || "#ccc" }} />
+                  <span style={{ fontSize: "11px", color: "#555" }}>{d.status}</span>
+                </div>
+              ))}
             </div>
 
-            {/* DONUT CHART */}
-            <PieChart width={280} height={280}>
+            <PieChart width={260} height={240}>
+              <Pie
+                data={airdropSummary.map((d) => ({ name: d.status, value: d.player_count }))}
+                cx={130} cy={120}
+                innerRadius={70} outerRadius={110}
+                paddingAngle={4}
+                dataKey="value"
+              >
+                {airdropSummary.map((d, index) => (
+                  <Cell key={index} fill={AIRDROP_COLORS[d.status] || "#ccc"} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v, name) => [`${v} players`, name]} />
+            </PieChart>
+
+            {/* STATS */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap", marginTop: "10px" }}>
+              {airdropSummary.map((d, i) => (
+                <div key={i} style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: "11px", color: "#666", margin: "4px 0" }}>{d.status}</p>
+                  <p style={{ fontSize: "20px", fontWeight: "900", color: AIRDROP_COLORS[d.status], margin: "0" }}>{d.player_count}</p>
+                  <p style={{ fontSize: "11px", color: "#999", margin: "2px 0" }}>{parseFloat(d.percentage).toFixed(1)}%</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* RIGHT COOKIE — Rewards vs Fees */}
+        {chartData && (
+          <div style={{ background: "#fff", borderRadius: "20px", padding: "30px", flex: "1", minWidth: "280px", maxWidth: "480px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", textAlign: "center" }}>
+            <h2 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(9px, 1.3vw, 12px)", marginBottom: "20px" }}>
+              🍪 Rewards vs Fees
+            </h2>
+
+            {/* CUSTOM LEGEND */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap", marginBottom: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ff5a5a" }} />
+                <span style={{ fontSize: "11px", color: "#555" }}>Reward Pool</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ffb347" }} />
+                <span style={{ fontSize: "11px", color: "#555" }}>Total Fees</span>
+              </div>
+            </div>
+
+            <PieChart width={260} height={240}>
               <Pie
                 data={[
                   { name: "Reward Pool", value: chartData.rewardPool },
                   { name: "Total Fees", value: chartData.totalFees },
                 ]}
-                cx={140}
-                cy={140}
-                innerRadius={80}
-                outerRadius={120}
+                cx={130} cy={120}
+                innerRadius={70} outerRadius={110}
                 paddingAngle={4}
                 dataKey="value"
               >
@@ -118,18 +194,26 @@ function App() {
                 <Cell fill="#ffb347" />
               </Pie>
               <Tooltip formatter={(v) => v.toFixed(2) + " ETH"} />
-              <Legend />
             </PieChart>
 
-            {/* RIGHT STAT — Gas Fees */}
-            <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "13px", color: "#666" }}>Gas Fees</p>
-              <p style={{ fontSize: "24px", fontWeight: "900", color: "#ffb347" }}>{chartData.gasFees.toFixed(2)} ETH</p>
+            {/* STATS */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap", marginTop: "10px" }}>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontSize: "11px", color: "#666", margin: "4px 0" }}>Reward Pool</p>
+                <p style={{ fontSize: "20px", fontWeight: "900", color: "#ff5a5a", margin: "0" }}>{chartData.rewardPool.toFixed(2)} ETH</p>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontSize: "11px", color: "#666", margin: "4px 0" }}>Reg Fees</p>
+                <p style={{ fontSize: "20px", fontWeight: "900", color: "#ffb347", margin: "0" }}>{chartData.regFees.toFixed(2)} ETH</p>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ fontSize: "11px", color: "#666", margin: "4px 0" }}>Gas Fees</p>
+                <p style={{ fontSize: "20px", fontWeight: "900", color: "#ffb347", margin: "0" }}>{chartData.gasFees.toFixed(2)} ETH</p>
+              </div>
             </div>
-
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* 🔍 SEARCH */}
       <h2 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(10px, 1.5vw, 14px)" }}>
@@ -153,8 +237,11 @@ function App() {
               <div key={index} onClick={() => setSelectedUser(user)}
                 style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", padding: "12px", marginBottom: "8px", background: "#fff", borderRadius: "10px", cursor: "pointer" }}>
                 <span>#{user.rank}</span>
-                <span style={{ wordBreak: "break-all" }}>{user.user_address}</span>
+                <span style={{ wordBreak: "break-all", flex: 1, margin: "0 8px" }}>{user.user_address}</span>
                 <span>{user.total_eth_spent.toFixed(3)} ETH</span>
+                <span style={{ color: getStatusColor(user.net_profit), fontWeight: "bold" }}>
+                  {getStatusLabel(user)}
+                </span>
               </div>
             ))
           )}
@@ -167,8 +254,13 @@ function App() {
           <h2>🧠 Wallet Details</h2>
           <p style={{ wordBreak: "break-all" }}><strong>Address:</strong> {selectedUser.user_address}</p>
           <p><strong>Rank:</strong> #{selectedUser.rank}</p>
-          <p><strong>Total ETH:</strong> {selectedUser.total_eth_spent.toFixed(4)}</p>
+          <p><strong>Total ETH Spent:</strong> {selectedUser.total_eth_spent.toFixed(4)} ETH</p>
           <p><strong>Transactions:</strong> {selectedUser.tx_count}</p>
+          <p><strong>Airdrop Received:</strong> {selectedUser.airdrop_received.toFixed(4)} ETH</p>
+          <p style={{ color: getStatusColor(selectedUser.net_profit), fontWeight: "bold" }}>
+            <strong>Net Profit/Loss:</strong> {selectedUser.net_profit.toFixed(4)} ETH &nbsp;
+            {getStatusLabel(selectedUser)}
+          </p>
           <button onClick={() => setSelectedUser(null)}
             style={{ marginTop: "10px", padding: "8px 16px", borderRadius: "20px", border: "none", background: "#ff5a5a", color: "#fff", cursor: "pointer", fontWeight: "bold" }}>
             Close
@@ -179,7 +271,7 @@ function App() {
       {/* 🏆 TOP 10 */}
       <h2 style={{ marginTop: "30px" }}>🏆 Top Minters</h2>
       {data.slice(0, 10).map((user, index) => (
-        <div key={index} onClick={() => setSelectedUser(user)}
+        <div key={index} onClick={() => setSelectedUser(airdropData.find(a => a.user_address === user.user_address) || user)}
           style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "6px", padding: "12px", marginBottom: "8px", background: "#fff", borderRadius: "10px", cursor: "pointer" }}>
           <span>#{user.rank}</span>
           <span>{user.user_address.slice(0, 6)}...{user.user_address.slice(-4)}</span>
