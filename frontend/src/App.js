@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell
 } from "recharts";
 
-const BASE_URL = "https://rugpull-bakery.onrender.com";
+const BASE_URL = "/api";
 
 const C = {
   bg:         "#0a0604",
