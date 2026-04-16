@@ -5,7 +5,7 @@ module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=86400");
   try {
     const r = await fetch(
-      `https://api.dune.com/api/v1/query/${QUERY_ID}/results`,
+      `https://api.dune.com/api/v1/query/${QUERY_ID}/results?limit=500`,
       { headers: { "X-Dune-API-Key": process.env.DUNE_API_KEY } }
     );
     const json = await r.json();
