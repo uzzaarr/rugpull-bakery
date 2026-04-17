@@ -14,6 +14,9 @@ let store = {
   gasFees: null,
   airdrop: null,
   airdropSummary: null,
+  s2Data: null,
+  s2Summary: null,
+  s1Comparison: null,
 };
 
 async function fetchOnce(key, queryId) {
@@ -101,6 +104,42 @@ app.get("/airdrop-summary", async (req, res) => {
   } catch (err) {
     console.error(err);
     if (store.airdropSummary) return res.json(store.airdropSummary);
+    res.status(500).send("Error fetching data");
+  }
+});
+
+// ✅ S2 PER-USER DATA
+app.get("/s2-data", async (req, res) => {
+  try {
+    const data = await fetchOnce("s2Data", "7329756");
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    if (store.s2Data) return res.json(store.s2Data);
+    res.status(500).send("Error fetching data");
+  }
+});
+
+// ✅ S2 AIRDROP SUMMARY
+app.get("/s2-summary", async (req, res) => {
+  try {
+    const data = await fetchOnce("s2Summary", "7329758");
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    if (store.s2Summary) return res.json(store.s2Summary);
+    res.status(500).send("Error fetching data");
+  }
+});
+
+// ✅ S1 DATA FOR COMPARISON
+app.get("/s1-comparison", async (req, res) => {
+  try {
+    const data = await fetchOnce("s1Comparison", "6978317");
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    if (store.s1Comparison) return res.json(store.s1Comparison);
     res.status(500).send("Error fetching data");
   }
 });

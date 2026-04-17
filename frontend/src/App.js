@@ -178,6 +178,20 @@ function App() {
   const [cookieState, setCookieState] = useState("hidden");
   const [page, setPage] = useState("s1");
 
+  // S2 state
+  const [s2Data, setS2Data] = useState([]);
+  const [s2Summary, setS2Summary] = useState(null);
+  const [s1CompData, setS1CompData] = useState([]);
+  const [s2Search, setS2Search] = useState("");
+
+  // Comparison state
+  const [compSeasonA, setCompSeasonA] = useState("s1");
+  const [compSeasonB, setCompSeasonB] = useState("s2");
+  const [compSearchA, setCompSearchA] = useState("");
+  const [compSearchB, setCompSearchB] = useState("");
+  const [compPlayerA, setCompPlayerA] = useState(null);
+  const [compPlayerB, setCompPlayerB] = useState(null);
+
   useEffect(() => {
     Promise.all([
       axios.get(`${BASE_URL}/top-minter-fees`),
@@ -186,7 +200,10 @@ function App() {
       axios.get(`${BASE_URL}/reg-fees`),
       axios.get(`${BASE_URL}/gas-fees`),
       axios.get(`${BASE_URL}/airdrop-summary`),
-    ]).then(([mintersRes, airdropRes, rewardRes, regRes, gasRes, summaryRes]) => {
+      axios.get(`${BASE_URL}/s2-data`),
+      axios.get(`${BASE_URL}/s2-summary`),
+      axios.get(`${BASE_URL}/s1-comparison`),
+    ]).then(([mintersRes, airdropRes, rewardRes, regRes, gasRes, summaryRes, s2Res, s2SumRes, s1CompRes]) => {
       setData(mintersRes.data.map((item) => ({
         rank: item.rank,
         total_eth_spent: Number(item.total_eth_spent || 0),
@@ -206,6 +223,23 @@ function App() {
       const gasFees   = gasRes.data.total_gas_fees;
       setChartData({ rewardPool, regFees, gasFees, totalFees: regFees + gasFees });
       setAirdropSummary(summaryRes.data);
+      setS2Data(s2Res.data.map((item) => ({
+        rank: item.rank,
+        user_address: (item.user_address || "").toLowerCase(),
+        total_eth_spent: Number(item.total_eth_spent || 0),
+        tx_count: item.tx_count || 0,
+        airdrop_received: Number(item.airdrop_received || 0),
+        net_profit: Number(item.net_profit || 0),
+      })));
+      setS2Summary(s2SumRes.data);
+      setS1CompData(s1CompRes.data.map((item) => ({
+        rank: item.rank,
+        user_address: (item.user_address || "").toLowerCase(),
+        total_eth_spent: Number(item.total_eth_spent || 0),
+        tx_count: item.tx_count || 0,
+        airdrop_received: Number(item.airdrop_received || 0),
+        net_profit: Number(item.net_profit || 0),
+      })));
       setLoading(false);
     }).catch((err) => {
       console.error(err);
@@ -229,6 +263,25 @@ function App() {
   const filtered = airdropData.filter((u) =>
     u.user_address.includes(search.toLowerCase())
   );
+
+  const s2Filtered = s2Data.filter((u) =>
+    u.user_address.includes(s2Search.toLowerCase())
+  );
+
+  const compDatasetA = compSeasonA === "s1" ? s1CompData : s2Data;
+  const compDatasetB = compSeasonB === "s1" ? s1CompData : s2Data;
+  const compFilteredA = compSearchA
+    ? compDatasetA.filter((u) => u.user_address.includes(compSearchA.toLowerCase())).slice(0, 8)
+    : [];
+  const compFilteredB = compSearchB
+    ? compDatasetB.filter((u) => u.user_address.includes(compSearchB.toLowerCase())).slice(0, 8)
+    : [];
+
+  const compChartData = compPlayerA && compPlayerB ? [
+    { metric: "ETH Spent", a: compPlayerA.total_eth_spent, b: compPlayerB.total_eth_spent },
+    { metric: "Airdrop",   a: compPlayerA.airdrop_received, b: compPlayerB.airdrop_received },
+    { metric: "Net P/L",   a: compPlayerA.net_profit, b: compPlayerB.net_profit },
+  ] : [];
 
   const totalETH = data.reduce((acc, u) => acc + u.total_eth_spent, 0);
 
@@ -515,27 +568,274 @@ function App() {
 
       {/* ── S2 PAGE ──────────────────────────────────────────────────────── */}
       {page === "s2" && (
-        <div style={{ textAlign: "center", padding: "100px 20px 80px", animation: "fadeUp 0.55s ease-out" }}>
-          <div style={{ display: "inline-block", marginBottom: "32px", padding: "1px 28px", border: `1px solid ${C.borderGold}`, borderRadius: "2px" }}>
-            <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "10px", color: C.gold, letterSpacing: "0.3em", textTransform: "uppercase" }}>
-              Coming Soon
-            </span>
-          </div>
-          <img src="/chef.png" alt="chef" style={{ width: "clamp(90px,14vw,130px)", display: "block", margin: "0 auto 28px", opacity: 0.5, filter: "sepia(0.3)" }} />
-          <h2 style={{
-            fontFamily: "'Playfair Display', serif",
-            fontStyle: "italic",
-            fontSize: "clamp(22px,4vw,40px)",
-            color: C.ivory,
-            margin: "0 0 14px",
-          }}>
-            Season Two
-          </h2>
-          <Ornament style={{ marginBottom: "18px" }} />
-          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "16px", color: C.muted, fontStyle: "italic" }}>
-            The oven is still warm. Check back soon.
-          </p>
-        </div>
+        <main style={{ maxWidth: "1160px", margin: "0 auto", padding: "44px clamp(16px,4vw,52px) 90px" }}>
+
+          {/* HERO */}
+          <section className="section-enter" style={{ textAlign: "center", marginBottom: "52px", position: "relative", padding: "52px 20px 44px" }}>
+            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 20%, rgba(201,124,10,0.07) 0%, transparent 65%)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "min(480px,90%)", height: "1px", background: `linear-gradient(90deg, transparent, ${C.borderGold} 30%, ${C.gold} 50%, ${C.borderGold} 70%, transparent)` }} />
+
+            <img src="/cookie.png" alt="" aria-hidden="true" style={{ position: "absolute", left: "clamp(6px,3vw,56px)", top: "28px", width: "clamp(26px,3.5vw,48px)", opacity: 0.2, transform: "rotate(-20deg)", filter: "sepia(0.4)", animation: "flourFloat 5s ease-in-out infinite" }} />
+            <img src="/cookie.png" alt="" aria-hidden="true" style={{ position: "absolute", right: "clamp(6px,3vw,56px)", top: "44px", width: "clamp(18px,2.5vw,34px)", opacity: 0.15, transform: "rotate(25deg)", filter: "sepia(0.4)", animation: "flourFloat 6.5s ease-in-out 1s infinite" }} />
+
+            <img src="/chef.png" alt="chef" style={{ width: "clamp(110px,15vw,185px)", display: "block", margin: "0 auto 18px", filter: "drop-shadow(0 20px 50px rgba(201,124,10,0.2)) sepia(0.1)" }} />
+
+            <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: "clamp(10px,1.2vw,12px)", color: C.gold, letterSpacing: "0.22em", textTransform: "uppercase", marginBottom: "14px" }}>
+              Season II · Fresh from the Oven
+            </div>
+
+            <div style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(52px,10vw,100px)",
+              fontWeight: 900, lineHeight: 1, marginBottom: "10px",
+              background: `linear-gradient(130deg, ${C.copper} 0%, ${C.goldLight} 40%, ${C.amber} 65%, ${C.goldLight} 85%, ${C.copper} 100%)`,
+              backgroundSize: "200% auto",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              animation: "goldFlow 5s ease infinite",
+            }}>
+              {s2Data.reduce((a, u) => a + u.total_eth_spent, 0).toFixed(2)} ETH
+            </div>
+            <p style={{ fontFamily: "'Crimson Pro', serif", fontStyle: "italic", color: C.muted, fontSize: "clamp(13px,1.5vw,16px)", margin: "0 0 6px" }}>
+              Total spent by S2 bakers
+            </p>
+            <p style={{ fontFamily: "'Crimson Pro', serif", color: C.mutedLight, fontSize: "13px", margin: 0 }}>
+              {s2Data.length} bakers participated
+            </p>
+            <Ornament style={{ marginTop: "28px" }} />
+          </section>
+
+          {/* S2 AIRDROP PIE + SUMMARY STATS */}
+          {s2Summary && (
+            <section className="section-enter" style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginBottom: "44px", animationDelay: "0.1s" }}>
+
+              {/* Donut chart */}
+              <div className="parchment-card chart-card" style={{ borderRadius: "20px", padding: "28px", flex: "1", minWidth: "270px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${C.borderGold}, transparent)` }} />
+                <SectionTitle sub="Season II outcome distribution">Airdrop Analysis</SectionTitle>
+                <ResponsiveContainer width="100%" height={210}>
+                  <PieChart>
+                    <Pie
+                      data={s2Summary.map((d) => ({ name: d.status, value: d.player_count }))}
+                      cx="50%" cy="50%" innerRadius={58} outerRadius={92}
+                      paddingAngle={5} dataKey="value" stroke="none"
+                    >
+                      {s2Summary.map((d, i) => <Cell key={i} fill={AIRDROP_COLORS[d.status] || C.muted} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.cream, fontFamily: "'Crimson Pro', serif" }} formatter={(v, name) => [`${v} bakers`, name]} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <Ornament style={{ margin: "4px 0 14px" }} />
+                <div style={{ display: "flex", justifyContent: "center", gap: "22px", flexWrap: "wrap" }}>
+                  {s2Summary.map((d, i) => (
+                    <div key={i} style={{ textAlign: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", justifyContent: "center" }}>
+                        <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: AIRDROP_COLORS[d.status] }} />
+                        <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "12px", color: C.muted }}>{d.status.replace(/[✅🔴💀]/g, "").trim()}</span>
+                      </div>
+                      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "19px", fontWeight: 900, color: AIRDROP_COLORS[d.status], margin: "0 0 1px" }}>{d.player_count}</p>
+                      <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "11px", color: C.muted, margin: 0 }}>{parseFloat(d.percentage).toFixed(1)}%</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* S2 extra summary stat cards */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", flex: "1", minWidth: "200px", justifyContent: "center" }}>
+                {[
+                  { label: "Total Fees Spent",     val: `${s2Summary.reduce((a,d)=>a+parseFloat(d.total_fees_spent||0),0).toFixed(3)} ETH`, color: C.copper, icon: "⛽" },
+                  { label: "Total Airdrop Given",  val: `${s2Summary.reduce((a,d)=>a+parseFloat(d.total_airdrop_received||0),0).toFixed(3)} ETH`, color: C.goldLight, icon: "🏆" },
+                  { label: "Net Community P/L",    val: `${s2Summary.reduce((a,d)=>a+parseFloat(d.total_net_profit||0),0).toFixed(3)} ETH`, color: s2Summary.reduce((a,d)=>a+parseFloat(d.total_net_profit||0),0) >= 0 ? C.greenBright : C.redBright, icon: "📊" },
+                ].map(({ label, val, color, icon }) => (
+                  <div key={label} className="stat-card parchment-card" style={{ borderRadius: "14px", padding: "18px 20px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${color}55, transparent)` }} />
+                    <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "10px", color: C.muted, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{icon} {label}</p>
+                    <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(16px,2vw,22px)", fontWeight: 900, color, margin: 0 }}>{val}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* S2 WALLET SEARCH */}
+          <section className="section-enter" style={{ marginBottom: "44px", animationDelay: "0.18s" }}>
+            <SectionTitle sub="Search any S2 baker's wallet">Baker Lookup — Season II</SectionTitle>
+            <div style={{ position: "relative", display: "inline-block", width: "min(460px,100%)" }}>
+              <span style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: C.muted, fontSize: "14px", pointerEvents: "none" }}>🔍</span>
+              <input
+                type="text"
+                placeholder="Enter a wallet address..."
+                value={s2Search}
+                onChange={(e) => setS2Search(e.target.value)}
+                className="search-input"
+                style={{ padding: "13px 18px 13px 40px", width: "100%", borderRadius: "10px", border: `1px solid ${C.border}`, background: C.card, color: C.cream, fontSize: "13px", fontFamily: "'JetBrains Mono', monospace", backgroundImage: `radial-gradient(ellipse at top left, rgba(201,124,10,0.04) 0%, transparent 60%)` }}
+              />
+            </div>
+            {s2Search && (
+              <div style={{ marginTop: "12px" }}>
+                {s2Filtered.length === 0 ? (
+                  <p style={{ fontFamily: "'Crimson Pro', serif", fontStyle: "italic", color: C.muted, fontSize: "15px" }}>No S2 baker found with that address.</p>
+                ) : (
+                  s2Filtered.slice(0, 20).map((user, i) => (
+                    <div key={i} onClick={() => setSelectedUser(user)} className="row-item parchment-card"
+                      style={{ display: "flex", alignItems: "center", gap: "10px", padding: "13px 17px", marginBottom: "6px", borderRadius: "10px", cursor: "pointer", position: "relative" }}>
+                      <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "12px", color: C.muted, minWidth: "30px" }}>#{user.rank}</span>
+                      <span style={{ flex: 1, fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: C.textSoft, wordBreak: "break-all" }}>{user.user_address}</span>
+                      <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "13px", fontWeight: 700, color: C.goldLight, whiteSpace: "nowrap" }}>{user.total_eth_spent.toFixed(3)} ETH</span>
+                      <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: getStatusColor(user), flexShrink: 0 }} />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* PLAYER COMPARISON */}
+          <section className="section-enter" style={{ animationDelay: "0.26s" }}>
+            <SectionTitle sub="Compare any two bakers across seasons">Baker vs. Baker</SectionTitle>
+
+            {/* Two-column search */}
+            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "20px", alignItems: "flex-start" }}>
+              {[
+                { label: "Player A", season: compSeasonA, setSeason: setCompSeasonA, search: compSearchA, setSearch: setCompSearchA, results: compFilteredA, player: compPlayerA, setPlayer: setCompPlayerA, color: C.goldLight },
+                { label: "Player B", season: compSeasonB, setSeason: setCompSeasonB, search: compSearchB, setSearch: setCompSearchB, results: compFilteredB, player: compPlayerB, setPlayer: setCompPlayerB, color: C.copper },
+              ].map(({ label, season, setSeason, search: srch, setSearch: setSrch, results, player, setPlayer, color }) => (
+                <div key={label} style={{ flex: "1", minWidth: "240px" }}>
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "14px", color, fontWeight: 700, minWidth: "64px" }}>{label}</span>
+                    <select
+                      value={season}
+                      onChange={(e) => { setSeason(e.target.value); setSrch(""); setPlayer(null); }}
+                      style={{ padding: "6px 10px", borderRadius: "8px", border: `1px solid ${C.border}`, background: C.card, color: C.cream, fontFamily: "'Crimson Pro', serif", fontSize: "13px", cursor: "pointer", flex: 1 }}
+                    >
+                      <option value="s1">Season I</option>
+                      <option value="s2">Season II</option>
+                    </select>
+                  </div>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type="text"
+                      placeholder="Search wallet..."
+                      value={srch}
+                      onChange={(e) => { setSrch(e.target.value); setPlayer(null); }}
+                      className="search-input"
+                      style={{ padding: "11px 14px", width: "100%", borderRadius: "10px", border: `1px solid ${player ? color + "66" : C.border}`, background: C.card, color: C.cream, fontSize: "12px", fontFamily: "'JetBrains Mono', monospace" }}
+                    />
+                    {srch && !player && results.length > 0 && (
+                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, background: C.parchment, border: `1px solid ${C.border}`, borderRadius: "10px", marginTop: "4px", overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.5)" }}>
+                        {results.map((u, i) => (
+                          <div key={i} onClick={() => { setPlayer(u); setSrch(u.user_address); }}
+                            style={{ padding: "10px 14px", cursor: "pointer", borderBottom: i < results.length - 1 ? `1px solid ${C.border}` : "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = C.cardHover}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                          >
+                            <span style={{ fontSize: "11px", fontFamily: "'JetBrains Mono', monospace", color: C.textSoft }}>{u.user_address.slice(0,10)}…{u.user_address.slice(-6)}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <span style={{ fontSize: "11px", color: C.goldLight }}>{u.total_eth_spent.toFixed(3)} ETH</span>
+                              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: getStatusColor(u) }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {player && (
+                    <div style={{ marginTop: "8px", padding: "10px 14px", background: `${color}12`, border: `1px solid ${color}44`, borderRadius: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", color: C.textSoft }}>{player.user_address.slice(0,10)}…</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "12px", color }}>#{player.rank}</span>
+                        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: getStatusColor(player) }} />
+                        <button onClick={() => { setPlayer(null); setSrch(""); }} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: "14px", lineHeight: 1, padding: "0 2px" }}>×</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* VS divider */}
+            {(!compPlayerA || !compPlayerB) && (
+              <div style={{ textAlign: "center", padding: "20px", color: C.muted, fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "14px" }}>
+                Search two wallets above to compare them
+              </div>
+            )}
+
+            {/* Comparison chart + cards */}
+            {compPlayerA && compPlayerB && (
+              <div style={{ animation: "fadeUp 0.4s ease-out" }}>
+                <div className="parchment-card" style={{ borderRadius: "20px", padding: "26px 22px", position: "relative", overflow: "hidden", marginBottom: "16px" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${C.borderGold}, transparent)` }} />
+                  <div style={{ display: "flex", gap: "20px", justifyContent: "center", marginBottom: "16px", flexWrap: "wrap" }}>
+                    {[{ label: "Player A", color: C.goldLight }, { label: "Player B", color: C.copper }].map(({ label, color }) => (
+                      <div key={label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ width: "12px", height: "12px", borderRadius: "3px", background: color }} />
+                        <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "13px", color: C.muted }}>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ width: "100%", height: "clamp(180px,26vw,260px)" }}>
+                    <ResponsiveContainer>
+                      <BarChart data={compChartData} margin={{ top: 4, right: 4, left: -8, bottom: 0 }} barCategoryGap="30%">
+                        <XAxis dataKey="metric" tick={{ fill: C.muted, fontSize: 11, fontFamily: "'Crimson Pro', serif" }} axisLine={{ stroke: C.border }} tickLine={false} />
+                        <YAxis tick={{ fill: C.muted, fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <Tooltip
+                          contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.cream, fontFamily: "'Crimson Pro', serif" }}
+                          formatter={(v, name) => [`${Number(v).toFixed(4)} ETH`, name === "a" ? `Player A (${compPlayerA.user_address.slice(0,8)}…)` : `Player B (${compPlayerB.user_address.slice(0,8)}…)`]}
+                          cursor={{ fill: "rgba(201,124,10,0.04)" }}
+                        />
+                        <Bar dataKey="a" fill={C.goldLight} radius={[4, 4, 0, 0]} name="a" />
+                        <Bar dataKey="b" fill={C.copper} radius={[4, 4, 0, 0]} name="b" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Summary cards */}
+                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                  {[
+                    { player: compPlayerA, label: "Player A", season: compSeasonA, color: C.goldLight },
+                    { player: compPlayerB, label: "Player B", season: compSeasonB, color: C.copper },
+                  ].map(({ player, label, season, color }) => (
+                    <div key={label} className="parchment-card" style={{ flex: "1", minWidth: "220px", borderRadius: "16px", padding: "20px", position: "relative", overflow: "hidden" }}>
+                      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${color}66, transparent)` }} />
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                        <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, color, fontSize: "15px" }}>{label}</span>
+                        <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "10px", color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", padding: "2px 8px", border: `1px solid ${C.borderGold}`, borderRadius: "4px" }}>
+                          {season === "s1" ? "Season I" : "Season II"}
+                        </span>
+                      </div>
+                      <div style={{ background: `${C.bg}cc`, borderRadius: "8px", padding: "8px 12px", marginBottom: "8px", border: `1px solid ${C.border}` }}>
+                        <p style={{ margin: 0, fontSize: "9px", color: C.muted, marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Wallet</p>
+                        <p style={{ margin: 0, fontSize: "10px", fontFamily: "'JetBrains Mono', monospace", color: C.textSoft, wordBreak: "break-all" }}>{player.user_address}</p>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "8px" }}>
+                        {[
+                          { label: "Rank",    val: `#${player.rank}` },
+                          { label: "Batches", val: player.tx_count },
+                          { label: "ETH In",  val: `${player.total_eth_spent.toFixed(4)}` },
+                          { label: "Airdrop", val: `${player.airdrop_received.toFixed(4)}` },
+                        ].map(({ label: l, val }) => (
+                          <div key={l} style={{ background: `${C.bg}cc`, borderRadius: "8px", padding: "8px 10px", border: `1px solid ${C.border}` }}>
+                            <p style={{ margin: 0, fontSize: "9px", color: C.muted, marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.06em" }}>{l}</p>
+                            <p style={{ margin: 0, fontSize: "14px", fontFamily: "'Playfair Display', serif", fontWeight: 700, color: C.ivory }}>{val}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ background: `${C.bg}cc`, borderRadius: "8px", padding: "10px 12px", border: `1px solid ${getStatusColor(player)}38` }}>
+                        <p style={{ margin: 0, fontSize: "9px", color: C.muted, marginBottom: "3px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Net P/L</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <p style={{ margin: 0, fontSize: "18px", fontFamily: "'Playfair Display', serif", fontWeight: 900, color: getStatusColor(player) }}>
+                            {player.net_profit > 0 ? "+" : ""}{player.net_profit.toFixed(4)} ETH
+                          </p>
+                          <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: getStatusColor(player) }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        </main>
       )}
 
       {/* ── S1 PAGE ──────────────────────────────────────────────────────── */}
