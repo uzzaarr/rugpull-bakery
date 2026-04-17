@@ -1,30 +1,47 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
+const DATA_DIR = path.join(__dirname, "data");
+
+function loadFromFile(key) {
+  const file = path.join(DATA_DIR, `${key}.json`);
+  if (fs.existsSync(file)) {
+    try {
+      const rows = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (rows && rows.length > 0) {
+        console.log(`${key}: loaded ${rows.length} rows from snapshot`);
+        return rows;
+      }
+    } catch (_) {}
+  }
+  return null;
+}
 
 let store = {
-  topMinters: null,
-  rewardPool: null,
-  regFees: null,
-  gasFees: null,
-  airdrop: null,
-  airdropSummary: null,
-  s2Data: null,
-  s2Summary: null,
-  s1Comparison: null,
+  topMinters: loadFromFile("topMinters"),
+  rewardPool: loadFromFile("rewardPool"),
+  regFees: loadFromFile("regFees"),
+  gasFees: loadFromFile("gasFees"),
+  airdrop: loadFromFile("airdrop"),
+  airdropSummary: loadFromFile("airdropSummary"),
+  s2Data: loadFromFile("s2Data"),
+  s2Summary: loadFromFile("s2Summary"),
+  s1Comparison: loadFromFile("s1Comparison"),
 };
 
 async function fetchOnce(key, queryId) {
   if (store[key]) {
-    console.log(`${key} already fetched, serving stored data`);
+    console.log(`${key} already in memory, serving stored data`);
     return store[key];
   }
-  console.log(`Fetching ${key} for the first time...`);
+  console.log(`${key}: no snapshot found, fetching from Dune...`);
   const response = await axios.get(
     `https://api.dune.com/api/v1/query/${queryId}/results`,
     { headers: { "X-Dune-API-Key": DUNE_API_KEY } }

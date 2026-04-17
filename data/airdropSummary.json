@@ -1,0 +1,26 @@
+[
+  {
+    "percentage": "41.430000000000000",
+    "player_count": 1966,
+    "status": "Net Loss 🔴",
+    "total_airdrop_received": 21.2771,
+    "total_fees_spent": 37.9417,
+    "total_net_profit": -16.6646
+  },
+  {
+    "percentage": "39.110000000000000",
+    "player_count": 1856,
+    "status": "Rugged 💀",
+    "total_airdrop_received": 0,
+    "total_fees_spent": 17.2778,
+    "total_net_profit": -17.2778
+  },
+  {
+    "percentage": "19.450000000000000",
+    "player_count": 923,
+    "status": "Recovered ✅",
+    "total_airdrop_received": 14.2908,
+    "total_fees_spent": 11.6202,
+    "total_net_profit": 2.6706
+  }
+]
