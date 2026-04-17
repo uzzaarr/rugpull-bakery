@@ -8,29 +8,39 @@ import {
 const BASE_URL = "/api";
 
 const C = {
-  bg:         "#0a0604",
-  card:       "#140c07",
-  cardHover:  "#1e1209",
-  border:     "#2a1508",
-  accent:     "#ff4545",
-  orange:     "#ff8c42",
-  green:      "#22c55e",
-  gray:       "#55545e",
-  text:       "#f0e8e0",
-  muted:      "#8a7060",
+  bg:         "#120a04",
+  bgDeep:     "#0d0702",
+  card:       "#1f1108",
+  cardHover:  "#2a1a0d",
+  parchment:  "#271608",
+  border:     "#3d2212",
+  borderGold: "#7a4e18",
+  gold:       "#c97c0a",
+  goldLight:  "#e8a020",
+  amber:      "#d48818",
+  copper:     "#b05c18",
+  green:      "#3d7050",
+  greenBright:"#52c278",
+  red:        "#b83818",
+  redBright:  "#e04828",
+  cream:      "#f2e4cc",
+  ivory:      "#e8d8bc",
+  muted:      "#7a6248",
+  mutedLight: "#9a8060",
+  textSoft:   "#c8b49a",
 };
 
 const AIRDROP_COLORS = {
-  "Recovered ✅": C.green,
-  "Net Loss 🔴":  C.accent,
-  "Rugged 💀":    C.gray,
+  "Recovered ✅": C.greenBright,
+  "Net Loss 🔴":  C.redBright,
+  "Rugged 💀":    C.muted,
 };
 
 const getStatusColor = (user) => {
-  if (!user) return C.gray;
-  if (user.airdrop_received === 0) return C.gray;
-  if (user.net_profit > 0) return C.green;
-  return C.accent;
+  if (!user) return C.muted;
+  if (user.airdrop_received === 0) return C.muted;
+  if (user.net_profit > 0) return C.greenBright;
+  return C.redBright;
 };
 
 const getStatusLabel = (user) => {
@@ -41,39 +51,121 @@ const getStatusLabel = (user) => {
 };
 
 const GLOBAL_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&display=swap');
+
   *, *::before, *::after { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: ${C.bg}; }
-  body { font-family: 'Inter', Arial, sans-serif; }
+  body { font-family: 'Crimson Pro', Georgia, serif; color: ${C.cream}; }
 
-  @keyframes bounce    { from { transform: translateY(0); }    to { transform: translateY(-16px); } }
-  @keyframes spin      { from { transform: rotate(0deg); }     to { transform: rotate(360deg); } }
-  @keyframes pulse     { 0%,100% { opacity:1; }                50% { opacity:0.35; } }
-  @keyframes fadeUp    { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes crackIn   { 0% { transform:scale(0.5) rotate(-5deg); opacity:0; } 60% { transform:scale(1.1) rotate(2deg); opacity:1; } 100% { transform:scale(1) rotate(0); opacity:1; } }
-  @keyframes shake     { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-8px); } 75% { transform:translateX(8px); } }
-  @keyframes slideUp   { from { transform:translateY(300px); } to { transform:translateY(0); } }
+  @keyframes bounce    { from{transform:translateY(0)} to{transform:translateY(-18px)} }
+  @keyframes spin      { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes fadeUp    { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes crackIn   { 0%{transform:scale(0.4) rotate(-8deg);opacity:0} 60%{transform:scale(1.12) rotate(3deg);opacity:1} 100%{transform:scale(1) rotate(0);opacity:1} }
+  @keyframes shake     { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)} }
+  @keyframes steamRise { 0%{opacity:0;transform:translateY(0) scaleX(1)} 30%{opacity:0.55;transform:translateY(-14px) scaleX(1.3)} 100%{opacity:0;transform:translateY(-42px) scaleX(0.7)} }
+  @keyframes goldFlow  { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+  @keyframes warmPulse { 0%,100%{box-shadow:0 0 20px rgba(201,124,10,0.12)} 50%{box-shadow:0 0 45px rgba(201,124,10,0.28)} }
+  @keyframes flourFloat{ 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.12} 50%{transform:translateY(-14px) rotate(180deg);opacity:0.28} }
+  @keyframes slideUp   { from{transform:translateY(300px)} to{transform:translateY(0)} }
+  @keyframes shimmer   { 0%{background-position:-200% center} 100%{background-position:200% center} }
 
-  .row-item { transition: background 0.15s, transform 0.12s; }
-  .row-item:hover { background: ${C.cardHover} !important; transform: translateX(3px); }
+  .row-item { transition: background 0.18s, transform 0.14s, border-color 0.2s; }
+  .row-item:hover { background: ${C.cardHover} !important; transform: translateX(5px); border-color: ${C.borderGold} !important; }
 
-  .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
-  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+  .stat-card { transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s; }
+  .stat-card:hover { transform: translateY(-6px); box-shadow: 0 24px 55px rgba(0,0,0,0.65), 0 0 35px rgba(201,124,10,0.12); border-color: ${C.borderGold} !important; }
 
   .nav-tab { transition: all 0.2s; }
 
-  .search-input { transition: border-color 0.2s, box-shadow 0.2s; }
-  .search-input:focus { border-color: ${C.accent} !important; box-shadow: 0 0 0 3px ${C.accent}22 !important; outline: none; }
+  .search-input { transition: border-color 0.2s, box-shadow 0.25s; }
+  .search-input:focus { border-color: ${C.gold} !important; box-shadow: 0 0 0 3px ${C.gold}28, inset 0 1px 0 rgba(255,255,255,0.04) !important; outline: none; }
 
   ::-webkit-scrollbar       { width: 5px; }
   ::-webkit-scrollbar-track { background: ${C.bg}; }
-  ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: ${C.borderGold}; }
 
   .footer-link { transition: color 0.2s; }
-  .footer-link:hover { color: ${C.accent} !important; }
+  .footer-link:hover { color: ${C.goldLight} !important; }
 
-  .close-btn { transition: opacity 0.15s, transform 0.15s; }
-  .close-btn:hover { opacity: 0.85; transform: scale(0.97); }
+  .close-btn { transition: background 0.2s, transform 0.15s; }
+  .close-btn:hover { background: ${C.amber} !important; transform: scale(0.98); }
+
+  .section-enter { animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+
+  .gold-text {
+    background: linear-gradient(120deg, ${C.copper} 0%, ${C.goldLight} 45%, ${C.amber} 70%, ${C.goldLight} 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: goldFlow 4s ease infinite;
+  }
+
+  .parchment-card {
+    background: ${C.card};
+    background-image:
+      radial-gradient(ellipse at top left, rgba(201,124,10,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(180,90,10,0.04) 0%, transparent 55%);
+    border: 1px solid ${C.border};
+  }
+
+  .parchment-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, transparent 40%);
+    pointer-events: none;
+  }
 `;
+
+// Decorative ornamental divider using Unicode glyphs
+const Ornament = ({ style }) => (
+  <div style={{ textAlign: "center", color: C.borderGold, fontSize: "11px", letterSpacing: "0.3em", opacity: 0.7, ...style }}>
+    ❧ ✦ ❧
+  </div>
+);
+
+// Section header with Playfair Display serif
+const SectionTitle = ({ children, sub, delay = "0s" }) => (
+  <div style={{ marginBottom: "20px", animationDelay: delay }}>
+    <h3 style={{
+      fontFamily: "'Playfair Display', Georgia, serif",
+      fontSize: "clamp(16px, 2.2vw, 22px)",
+      fontStyle: "italic",
+      fontWeight: 700,
+      color: C.cream,
+      margin: 0,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.2,
+    }}>
+      {children}
+    </h3>
+    {sub && <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "13px", color: C.muted, margin: "4px 0 0", letterSpacing: "0.04em" }}>{sub}</p>}
+    <div style={{ width: "36px", height: "2px", background: `linear-gradient(90deg, ${C.gold}, transparent)`, marginTop: "8px", borderRadius: "2px" }} />
+  </div>
+);
+
+// Steam particle component
+const Steam = () => (
+  <div style={{ position: "relative", width: "60px", height: "50px", margin: "0 auto" }}>
+    {[0, 1, 2].map(i => (
+      <div key={i} className="steam-particle" style={{
+        position: "absolute",
+        bottom: 0,
+        left: `${14 + i * 14}px`,
+        width: "6px",
+        height: "24px",
+        background: `radial-gradient(ellipse, rgba(242,228,204,0.5) 0%, transparent 80%)`,
+        borderRadius: "50%",
+        animationDelay: `${i * 0.7}s`,
+        animation: `steamRise 2s ease-out ${i * 0.7}s infinite`,
+      }} />
+    ))}
+  </div>
+);
 
 function App() {
   const [data, setData] = useState([]);
@@ -110,8 +202,8 @@ function App() {
         net_profit: Number(item.net_profit || 0),
       })));
       const rewardPool = rewardRes.data.total_reward_pool;
-      const regFees = regRes.data.total_reg_fees;
-      const gasFees = gasRes.data.total_gas_fees;
+      const regFees   = regRes.data.total_reg_fees;
+      const gasFees   = gasRes.data.total_gas_fees;
       setChartData({ rewardPool, regFees, gasFees, totalFees: regFees + gasFees });
       setAirdropSummary(summaryRes.data);
       setLoading(false);
@@ -146,21 +238,82 @@ function App() {
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center",
         justifyContent: "center", minHeight: "100vh", background: C.bg,
+        gap: 0,
       }}>
         <style>{GLOBAL_STYLES}</style>
-        <img src="/chef.png" alt="chef" style={{ width: "110px", marginBottom: "24px", animation: "bounce 0.85s infinite alternate ease-in-out" }} />
-        <img src="/cookie.png" alt="" style={{ width: "38px", marginBottom: "20px", animation: "spin 1.4s linear infinite" }} />
-        <p style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "11px", color: C.accent, textAlign: "center", lineHeight: "2.4", animation: "pulse 1.6s infinite" }}>
-          Baking data...<br />please wait 🍪
-        </p>
+        <style>{`.steam-particle { animation: steamRise 2s ease-out infinite; }`}</style>
+
+        {/* Decorative top border */}
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: "3px", background: `linear-gradient(90deg, transparent, ${C.gold}, ${C.amber}, ${C.gold}, transparent)` }} />
+
+        <div style={{ textAlign: "center", animation: "fadeUp 0.7s ease-out" }}>
+          <div style={{
+            display: "inline-block",
+            padding: "2px 20px 0",
+            borderTop: `1px solid ${C.borderGold}`,
+            borderBottom: `1px solid ${C.borderGold}`,
+            marginBottom: "28px",
+            color: C.gold,
+            fontFamily: "'Crimson Pro', serif",
+            fontSize: "11px",
+            letterSpacing: "0.35em",
+            textTransform: "uppercase",
+          }}>
+            Est. Season One
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <img src="/chef.png" alt="chef" style={{
+              width: "clamp(90px,14vw,130px)",
+              display: "block",
+              margin: "0 auto 8px",
+              filter: "drop-shadow(0 12px 32px rgba(201,124,10,0.22))",
+              animation: "bounce 0.9s infinite alternate ease-in-out",
+            }} />
+            <Steam />
+          </div>
+
+          <div style={{ position: "relative", display: "inline-block", marginBottom: "20px" }}>
+            <img src="/cookie.png" alt="" style={{
+              width: "34px",
+              animation: "spin 1.6s linear infinite",
+              filter: "sepia(0.4) saturate(1.5) hue-rotate(-10deg)",
+            }} />
+          </div>
+
+          <p style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "clamp(13px,2vw,17px)",
+            fontStyle: "italic",
+            color: C.ivory,
+            margin: "0 0 6px",
+            animation: "pulse 2s infinite",
+          }}>
+            Baking your data fresh...
+          </p>
+          <p style={{
+            fontFamily: "'Crimson Pro', serif",
+            fontSize: "13px",
+            color: C.muted,
+            letterSpacing: "0.05em",
+          }}>
+            Please wait while the oven warms up 🍪
+          </p>
+        </div>
+
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, height: "3px", background: `linear-gradient(90deg, transparent, ${C.gold}, ${C.amber}, ${C.gold}, transparent)` }} />
       </div>
     );
   }
 
   // ── MAIN ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", color: C.text }}>
+    <div style={{ background: C.bg, minHeight: "100vh", color: C.cream, position: "relative" }}>
       <style>{GLOBAL_STYLES}</style>
+      <style>{`.steam-particle { animation: steamRise 2s ease-out infinite; }`}</style>
+
+      {/* Top accent bar */}
+      <div style={{ height: "3px", background: `linear-gradient(90deg, transparent 0%, ${C.copper} 15%, ${C.goldLight} 50%, ${C.copper} 85%, transparent 100%)` }} />
 
       {/* ── COOKIE POPUP ─────────────────────────────────────────────────── */}
       {selectedUser && (
@@ -168,82 +321,140 @@ function App() {
           onClick={(e) => { if (e.target === e.currentTarget) setSelectedUser(null); }}
           style={{
             position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.78)",
-            backdropFilter: "blur(10px)",
+            background: "rgba(10,5,2,0.88)",
+            backdropFilter: "blur(12px)",
             display: "flex", alignItems: "center", justifyContent: "center",
             zIndex: 1000, flexDirection: "column",
           }}
         >
-          {/* whole cookie */}
           {cookieState !== "cracked" && (
             <div
               onClick={handleCookieClick}
               style={{
                 textAlign: "center", cursor: "pointer",
                 transform: cookieState === "whole" ? "translateY(0)" : "translateY(320px)",
-                transition: "transform 0.6s cubic-bezier(0.34,1.56,0.64,1)",
+                transition: "transform 0.65s cubic-bezier(0.34,1.56,0.64,1)",
               }}
             >
-              <img src="/cookie.png" alt="cookie" style={{ width: "160px", filter: "drop-shadow(0 12px 40px rgba(255,140,66,0.45))" }} />
-              <p style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "10px", color: "#fff", marginTop: "16px", lineHeight: "2.2", opacity: 0.75 }}>
-                tap to crack! 🍪
+              <img src="/cookie.png" alt="cookie" style={{
+                width: "160px",
+                filter: "sepia(0.3) saturate(1.4) hue-rotate(-8deg) drop-shadow(0 14px 44px rgba(201,124,10,0.5))",
+                animation: "warmPulse 2s ease infinite",
+              }} />
+              <p style={{
+                fontFamily: "'Playfair Display', serif",
+                fontStyle: "italic",
+                fontSize: "15px",
+                color: C.ivory,
+                marginTop: "18px",
+                opacity: 0.8,
+                letterSpacing: "0.02em",
+              }}>
+                Tap to crack open your fortune 🍪
               </p>
             </div>
           )}
 
-          {/* cracked cookie + details */}
           {cookieState === "cracked" && (
-            <div style={{ animation: "crackIn 0.4s ease-out forwards", textAlign: "center", maxWidth: "420px", width: "92%", padding: "0 8px" }}>
-              <img src="/cookie-cracked.png" alt="cracked" style={{ width: "120px", marginBottom: "14px", animation: "shake 0.3s ease-out", filter: "drop-shadow(0 10px 28px rgba(255,140,66,0.3))" }} />
+            <div style={{
+              animation: "crackIn 0.45s cubic-bezier(0.22,1,0.36,1) forwards",
+              textAlign: "center",
+              maxWidth: "440px",
+              width: "93%",
+              padding: "0 10px",
+            }}>
+              <img src="/cookie-cracked.png" alt="cracked" style={{
+                width: "110px",
+                marginBottom: "16px",
+                animation: "shake 0.35s ease-out",
+                filter: "sepia(0.3) saturate(1.3) drop-shadow(0 10px 30px rgba(201,124,10,0.35))",
+              }} />
 
               <div style={{
-                fontFamily: "'Press Start 2P', cursive",
-                fontSize: "clamp(14px, 3.5vw, 22px)",
-                fontWeight: "900", color: getStatusColor(selectedUser),
-                marginBottom: "18px",
-                textShadow: `0 0 24px ${getStatusColor(selectedUser)}55`,
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "clamp(18px,4vw,26px)",
+                fontStyle: "italic",
+                fontWeight: 700,
+                color: getStatusColor(selectedUser),
+                marginBottom: "20px",
+                textShadow: `0 0 28px ${getStatusColor(selectedUser)}44`,
               }}>
                 {getStatusLabel(selectedUser)}
               </div>
 
-              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "20px", padding: "22px", textAlign: "left", boxShadow: "0 24px 64px rgba(0,0,0,0.7)" }}>
-                <p style={{ fontSize: "10px", color: C.muted, textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 14px 0" }}>Wallet Details</p>
+              {/* Parchment card */}
+              <div style={{
+                background: C.parchment,
+                backgroundImage: `radial-gradient(ellipse at top, rgba(201,124,10,0.08) 0%, transparent 65%)`,
+                border: `1px solid ${C.border}`,
+                borderTop: `1px solid ${C.borderGold}`,
+                borderRadius: "20px",
+                padding: "24px",
+                textAlign: "left",
+                boxShadow: "0 28px 70px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.04)",
+                position: "relative",
+                overflow: "hidden",
+              }}>
+                {/* Inner top glow */}
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(90deg, transparent, ${C.borderGold}, transparent)` }} />
 
-                {/* address */}
-                <div style={{ background: C.bg, borderRadius: "10px", padding: "10px 14px", marginBottom: "10px" }}>
-                  <p style={{ margin: 0, fontSize: "9px", color: C.muted, marginBottom: "4px" }}>ADDRESS</p>
-                  <p style={{ margin: 0, wordBreak: "break-all", fontSize: "11px", color: C.text, fontFamily: "monospace", lineHeight: "1.6" }}>{selectedUser.user_address}</p>
+                <p style={{
+                  fontFamily: "'Crimson Pro', serif",
+                  fontSize: "10px",
+                  color: C.muted,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                  margin: "0 0 16px",
+                }}>
+                  — Baker's Receipt —
+                </p>
+
+                <div style={{ background: `${C.bg}cc`, borderRadius: "10px", padding: "11px 14px", marginBottom: "10px", border: `1px solid ${C.border}` }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: C.muted, marginBottom: "5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Wallet</p>
+                  <p style={{ margin: 0, wordBreak: "break-all", fontSize: "11px", color: C.textSoft, fontFamily: "'JetBrains Mono', monospace", lineHeight: "1.65" }}>
+                    {selectedUser.user_address}
+                  </p>
                 </div>
 
-                {/* grid stats */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "10px" }}>
                   {[
-                    { label: "RANK",     val: `#${selectedUser.rank}` },
-                    { label: "TX COUNT", val: selectedUser.tx_count },
-                    { label: "ETH SPENT", val: `${selectedUser.total_eth_spent?.toFixed(4)} ETH` },
-                    { label: "AIRDROP",  val: `${selectedUser.airdrop_received?.toFixed(4)} ETH` },
+                    { label: "Rank",       val: `#${selectedUser.rank}` },
+                    { label: "Batches",    val: selectedUser.tx_count },
+                    { label: "ETH In",     val: `${selectedUser.total_eth_spent?.toFixed(4)}` },
+                    { label: "Airdrop",    val: `${selectedUser.airdrop_received?.toFixed(4)}` },
                   ].map(({ label, val }) => (
-                    <div key={label} style={{ background: C.bg, borderRadius: "10px", padding: "10px 14px" }}>
-                      <p style={{ margin: 0, fontSize: "9px", color: C.muted, marginBottom: "4px" }}>{label}</p>
-                      <p style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: C.text }}>{val}</p>
+                    <div key={label} style={{ background: `${C.bg}cc`, borderRadius: "10px", padding: "11px 14px", border: `1px solid ${C.border}` }}>
+                      <p style={{ margin: 0, fontSize: "10px", color: C.muted, marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.07em" }}>{label}</p>
+                      <p style={{ margin: 0, fontSize: "16px", fontFamily: "'Playfair Display', serif", fontWeight: 700, color: C.ivory }}>{val}</p>
                     </div>
                   ))}
                 </div>
 
-                {/* net profit */}
-                <div style={{ background: C.bg, borderRadius: "10px", padding: "12px 14px", border: `1px solid ${getStatusColor(selectedUser)}33`, marginBottom: "16px" }}>
-                  <p style={{ margin: 0, fontSize: "9px", color: C.muted, marginBottom: "4px" }}>NET PROFIT / LOSS</p>
-                  <p style={{ margin: 0, fontSize: "22px", fontWeight: "900", color: getStatusColor(selectedUser) }}>
+                <div style={{
+                  background: `${C.bg}cc`,
+                  borderRadius: "10px",
+                  padding: "13px 14px",
+                  border: `1px solid ${getStatusColor(selectedUser)}38`,
+                  marginBottom: "18px",
+                }}>
+                  <p style={{ margin: 0, fontSize: "10px", color: C.muted, marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.07em" }}>Net Profit / Loss</p>
+                  <p style={{ margin: 0, fontSize: "clamp(20px,4vw,26px)", fontFamily: "'Playfair Display', serif", fontWeight: 900, color: getStatusColor(selectedUser) }}>
                     {selectedUser.net_profit > 0 ? "+" : ""}{selectedUser.net_profit?.toFixed(4)} ETH
                   </p>
                 </div>
 
                 <button className="close-btn" onClick={() => setSelectedUser(null)} style={{
-                  width: "100%", padding: "13px", borderRadius: "12px",
-                  border: "none", background: C.accent, color: "#fff",
-                  cursor: "pointer", fontWeight: "700", fontSize: "14px",
+                  width: "100%", padding: "14px",
+                  borderRadius: "12px", border: "none",
+                  background: C.gold, color: C.bg,
+                  cursor: "pointer",
+                  fontFamily: "'Playfair Display', serif",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                  fontSize: "15px",
+                  letterSpacing: "0.02em",
                 }}>
-                  Close
+                  Close the Tin
                 </button>
               </div>
             </div>
@@ -254,28 +465,48 @@ function App() {
       {/* ── HEADER ───────────────────────────────────────────────────────── */}
       <header style={{
         position: "sticky", top: 0, zIndex: 100,
-        background: `${C.bg}f0`,
-        backdropFilter: "blur(14px)",
+        background: `${C.bgDeep}ee`,
+        backdropFilter: "blur(16px)",
         borderBottom: `1px solid ${C.border}`,
       }}>
-        <div style={{ maxWidth: "1140px", margin: "0 auto", padding: "0 clamp(16px,4vw,48px)", display: "flex", justifyContent: "space-between", alignItems: "center", height: "62px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <img src="/logo.png" alt="logo" style={{ width: "36px", height: "36px", objectFit: "contain" }} />
-            <span style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "9px", color: C.text, display: "block" }}>
-              Rugpull Bakery
-            </span>
+        <div style={{
+          maxWidth: "1160px", margin: "0 auto",
+          padding: "0 clamp(16px,4vw,52px)",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          height: "64px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <img src="/logo.png" alt="logo" style={{ width: "34px", height: "34px", objectFit: "contain", filter: "sepia(0.2) saturate(1.3)" }} />
+            <div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "clamp(12px,1.5vw,15px)", color: C.cream, lineHeight: 1.1 }}>
+                Rugpull Bakery
+              </div>
+              <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: "9px", color: C.muted, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: "1px" }}>
+                On-Chain Confectionery
+              </div>
+            </div>
           </div>
-          <nav style={{ display: "flex", gap: "8px" }}>
-            {["s1", "s2"].map((p) => (
-              <button key={p} onClick={() => setPage(p)} className="nav-tab" style={{
-                padding: "7px 18px", borderRadius: "20px",
-                border: page === p ? "none" : `1px solid ${C.border}`,
-                background: page === p ? C.accent : "transparent",
-                color: page === p ? "#fff" : C.muted,
-                fontFamily: "'Press Start 2P', cursive",
-                fontSize: "9px", cursor: "pointer",
+
+          <nav style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+            {[
+              { id: "s1", label: "Season I" },
+              { id: "s2", label: "Season II" },
+            ].map(({ id, label }) => (
+              <button key={id} onClick={() => setPage(id)} className="nav-tab" style={{
+                padding: "8px 20px",
+                borderRadius: "6px",
+                border: page === id ? `1px solid ${C.borderGold}` : `1px solid ${C.border}`,
+                background: page === id
+                  ? `linear-gradient(135deg, ${C.copper}22, ${C.gold}18)`
+                  : "transparent",
+                color: page === id ? C.goldLight : C.muted,
+                fontFamily: "'Crimson Pro', serif",
+                fontStyle: page === id ? "italic" : "normal",
+                fontSize: "clamp(12px,1.3vw,14px)",
+                cursor: "pointer",
+                letterSpacing: "0.04em",
               }}>
-                {p.toUpperCase()}
+                {label}
               </button>
             ))}
           </nav>
@@ -284,94 +515,168 @@ function App() {
 
       {/* ── S2 PAGE ──────────────────────────────────────────────────────── */}
       {page === "s2" && (
-        <div style={{ textAlign: "center", padding: "120px 20px", animation: "fadeUp 0.5s ease-out" }}>
-          <img src="/chef.png" alt="chef" style={{ width: "120px", marginBottom: "24px", opacity: 0.55 }} />
-          <h2 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(11px, 2vw, 17px)", color: C.accent, lineHeight: "2.4", marginBottom: "16px" }}>
-            Season 2<br />Coming Soon 🍪
+        <div style={{ textAlign: "center", padding: "100px 20px 80px", animation: "fadeUp 0.55s ease-out" }}>
+          <div style={{ display: "inline-block", marginBottom: "32px", padding: "1px 28px", border: `1px solid ${C.borderGold}`, borderRadius: "2px" }}>
+            <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "10px", color: C.gold, letterSpacing: "0.3em", textTransform: "uppercase" }}>
+              Coming Soon
+            </span>
+          </div>
+          <img src="/chef.png" alt="chef" style={{ width: "clamp(90px,14vw,130px)", display: "block", margin: "0 auto 28px", opacity: 0.5, filter: "sepia(0.3)" }} />
+          <h2 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontStyle: "italic",
+            fontSize: "clamp(22px,4vw,40px)",
+            color: C.ivory,
+            margin: "0 0 14px",
+          }}>
+            Season Two
           </h2>
-          <p style={{ color: C.muted, fontSize: "14px" }}>The oven is still warm.</p>
+          <Ornament style={{ marginBottom: "18px" }} />
+          <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "16px", color: C.muted, fontStyle: "italic" }}>
+            The oven is still warm. Check back soon.
+          </p>
         </div>
       )}
 
       {/* ── S1 PAGE ──────────────────────────────────────────────────────── */}
       {page === "s1" && (
-        <main style={{ maxWidth: "1140px", margin: "0 auto", padding: "40px clamp(16px,4vw,48px) 80px" }}>
+        <main style={{ maxWidth: "1160px", margin: "0 auto", padding: "44px clamp(16px,4vw,52px) 90px" }}>
 
-          {/* HERO */}
-          <section style={{ textAlign: "center", marginBottom: "48px", animation: "fadeUp 0.5s ease-out", position: "relative", padding: "48px 20px 36px" }}>
-            {/* radial glow */}
-            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 0%, rgba(255,69,69,0.1) 0%, transparent 68%)", pointerEvents: "none" }} />
-            {/* floating cookies */}
-            <img src="/cookie.png" alt="" aria-hidden="true" style={{ position: "absolute", left: "clamp(8px,4vw,64px)", top: "24px", width: "clamp(28px,3.5vw,50px)", opacity: 0.4, transform: "rotate(-18deg)" }} />
-            <img src="/cookie.png" alt="" aria-hidden="true" style={{ position: "absolute", right: "clamp(8px,4vw,64px)", top: "36px", width: "clamp(22px,2.8vw,40px)", opacity: 0.3, transform: "rotate(22deg)" }} />
+          {/* ── HERO ─────────────────────────────────────────────────────── */}
+          <section className="section-enter" style={{ textAlign: "center", marginBottom: "52px", position: "relative", padding: "52px 20px 44px", animationDelay: "0s" }}>
+            {/* Ambient glow behind */}
+            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 20%, rgba(201,124,10,0.08) 0%, transparent 65%)", pointerEvents: "none" }} />
 
-            <img src="/chef.png" alt="chef" style={{ width: "clamp(120px,16vw,200px)", display: "block", margin: "0 auto 20px", filter: "drop-shadow(0 20px 48px rgba(255,140,66,0.18))" }} />
+            {/* Top ornamental border */}
+            <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "min(480px,90%)", height: "1px", background: `linear-gradient(90deg, transparent, ${C.borderGold} 30%, ${C.gold} 50%, ${C.borderGold} 70%, transparent)` }} />
 
-            <p style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(9px,1.3vw,12px)", color: C.muted, marginBottom: "12px", lineHeight: "2" }}>
-              Season 1 · Did you get rugged?
-            </p>
+            {/* Floating cookie left */}
+            <img src="/cookie.png" alt="" aria-hidden="true" style={{
+              position: "absolute", left: "clamp(6px,3vw,56px)", top: "28px",
+              width: "clamp(26px,3.5vw,48px)", opacity: 0.22,
+              transform: "rotate(-20deg)",
+              filter: "sepia(0.4)",
+              animation: "flourFloat 5s ease-in-out infinite",
+            }} />
+            <img src="/cookie.png" alt="" aria-hidden="true" style={{
+              position: "absolute", right: "clamp(6px,3vw,56px)", top: "44px",
+              width: "clamp(18px,2.5vw,34px)", opacity: 0.16,
+              transform: "rotate(25deg)",
+              filter: "sepia(0.4)",
+              animation: "flourFloat 6.5s ease-in-out 1s infinite",
+            }} />
+
+            <img src="/chef.png" alt="Rugpull Bakery Chef" style={{
+              width: "clamp(110px,15vw,185px)",
+              display: "block",
+              margin: "0 auto 18px",
+              filter: "drop-shadow(0 20px 50px rgba(201,124,10,0.2)) sepia(0.1)",
+            }} />
 
             <div style={{
-              fontSize: "clamp(48px,9vw,92px)", fontWeight: "900", lineHeight: "1", marginBottom: "10px",
-              background: "linear-gradient(130deg,#ff4545 0%,#ff8c42 55%,#ffb347 100%)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              fontFamily: "'Crimson Pro', serif",
+              fontSize: "clamp(10px,1.2vw,12px)",
+              color: C.gold,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              marginBottom: "14px",
+            }}>
+              Season I · The Full Receipt
+            </div>
+
+            <div style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(52px,10vw,100px)",
+              fontWeight: 900,
+              lineHeight: 1,
+              marginBottom: "10px",
+              background: `linear-gradient(130deg, ${C.copper} 0%, ${C.goldLight} 40%, ${C.amber} 65%, ${C.goldLight} 85%, ${C.copper} 100%)`,
+              backgroundSize: "200% auto",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              animation: "goldFlow 5s ease infinite",
             }}>
               {totalETH.toFixed(2)} ETH
             </div>
-            <p style={{ color: C.muted, fontSize: "clamp(12px,1.4vw,15px)", margin: 0 }}>Total spent by all bakers</p>
+
+            <p style={{ fontFamily: "'Crimson Pro', serif", fontStyle: "italic", color: C.muted, fontSize: "clamp(13px,1.5vw,16px)", margin: 0 }}>
+              Total spent by all bakers
+            </p>
+
+            <Ornament style={{ marginTop: "28px" }} />
           </section>
 
-          {/* STAT CARDS */}
+          {/* ── STAT CARDS ───────────────────────────────────────────────── */}
           {chartData && (
-            <section style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "36px", animation: "fadeUp 0.6s ease-out" }}>
+            <section className="section-enter" style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "40px", animationDelay: "0.1s" }}>
               {[
-                { label: "Reward Pool", val: `${chartData.rewardPool.toFixed(2)} ETH`, color: C.accent },
-                { label: "Reg Fees",    val: `${chartData.regFees.toFixed(2)} ETH`,    color: C.orange },
-                { label: "Gas Fees",    val: `${chartData.gasFees.toFixed(2)} ETH`,    color: C.orange },
+                { label: "Reward Pool",  val: `${chartData.rewardPool.toFixed(2)}`,  unit: "ETH", color: C.goldLight, icon: "🏆" },
+                { label: "Reg. Fees",   val: `${chartData.regFees.toFixed(2)}`,    unit: "ETH", color: C.amber,     icon: "📋" },
+                { label: "Gas Fees",    val: `${chartData.gasFees.toFixed(2)}`,    unit: "ETH", color: C.copper,    icon: "⛽" },
                 ...(airdropSummary || []).map((d) => ({
-                  label: d.status.replace(/[✅🔴💀]/g, "").trim(),
+                  label: d.status.replace(/[✅🔴💀]/g,"").trim(),
                   val: String(d.player_count),
-                  sub: `${parseFloat(d.percentage).toFixed(1)}%`,
+                  unit: `${parseFloat(d.percentage).toFixed(1)}%`,
                   color: AIRDROP_COLORS[d.status],
+                  icon: d.status.match(/[✅🔴💀]/)?.[0] || "•",
                 })),
-              ].map(({ label, val, sub, color }) => (
-                <div key={label} className="stat-card" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "14px", padding: "18px 20px", flex: "1", minWidth: "120px" }}>
-                  <p style={{ fontSize: "9px", color: C.muted, margin: "0 0 7px", textTransform: "uppercase", letterSpacing: "0.07em" }}>{label}</p>
-                  <p style={{ fontSize: "clamp(15px,1.8vw,20px)", fontWeight: "900", color, margin: "0 0 3px" }}>{val}</p>
-                  {sub && <p style={{ fontSize: "10px", color: C.muted, margin: 0 }}>{sub}</p>}
+              ].map(({ label, val, unit, color, icon }) => (
+                <div key={label} className="stat-card parchment-card" style={{ borderRadius: "14px", padding: "18px 20px", flex: "1", minWidth: "120px", position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${color}55, transparent)` }} />
+                  <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "10px", color: C.muted, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                    {icon} {label}
+                  </p>
+                  <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(16px,2vw,22px)", fontWeight: 900, color, margin: "0 0 3px", lineHeight: 1 }}>
+                    {val}
+                  </p>
+                  <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "12px", color: C.muted, margin: 0 }}>{unit}</p>
                 </div>
               ))}
             </section>
           )}
 
-          {/* CHARTS ROW */}
-          <section style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginBottom: "40px", animation: "fadeUp 0.7s ease-out" }}>
+          {/* ── CHARTS ROW ───────────────────────────────────────────────── */}
+          <section className="section-enter" style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginBottom: "44px", animationDelay: "0.18s" }}>
 
             {/* Airdrop donut */}
             {airdropSummary && (
-              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "20px", padding: "26px", flex: "1", minWidth: "270px" }}>
-                <h3 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(8px,1.1vw,10px)", margin: "0 0 18px", color: C.text }}>
-                  🍪 Airdrop Analysis
-                </h3>
+              <div className="parchment-card chart-card" style={{ borderRadius: "20px", padding: "28px", flex: "1", minWidth: "270px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${C.borderGold}, transparent)` }} />
+                <SectionTitle sub="Season I outcome distribution">
+                  Airdrop Analysis
+                </SectionTitle>
                 <ResponsiveContainer width="100%" height={210}>
                   <PieChart>
-                    <Pie data={airdropSummary.map((d) => ({ name: d.status, value: d.player_count }))}
-                      cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value">
-                      {airdropSummary.map((d, i) => <Cell key={i} fill={AIRDROP_COLORS[d.status] || "#ccc"} />)}
+                    <Pie
+                      data={airdropSummary.map((d) => ({ name: d.status, value: d.player_count }))}
+                      cx="50%" cy="50%" innerRadius={58} outerRadius={92}
+                      paddingAngle={5} dataKey="value" stroke="none"
+                    >
+                      {airdropSummary.map((d, i) => <Cell key={i} fill={AIRDROP_COLORS[d.status] || C.muted} />)}
                     </Pie>
-                    <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.text }}
-                      formatter={(v, name) => [`${v} players`, name]} />
+                    <Tooltip
+                      contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.cream, fontFamily: "'Crimson Pro', serif" }}
+                      formatter={(v, name) => [`${v} bakers`, name]}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", marginTop: "10px" }}>
+                <Ornament style={{ margin: "4px 0 14px" }} />
+                <div style={{ display: "flex", justifyContent: "center", gap: "22px", flexWrap: "wrap" }}>
                   {airdropSummary.map((d, i) => (
                     <div key={i} style={{ textAlign: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "4px" }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: AIRDROP_COLORS[d.status] }} />
-                        <span style={{ fontSize: "10px", color: C.muted }}>{d.status.replace(/[✅🔴💀]/g, "").trim()}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", justifyContent: "center" }}>
+                        <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: AIRDROP_COLORS[d.status] }} />
+                        <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "12px", color: C.muted }}>
+                          {d.status.replace(/[✅🔴💀]/g, "").trim()}
+                        </span>
                       </div>
-                      <p style={{ fontSize: "17px", fontWeight: "900", color: AIRDROP_COLORS[d.status], margin: "0 0 2px" }}>{d.player_count}</p>
-                      <p style={{ fontSize: "10px", color: C.muted, margin: 0 }}>{parseFloat(d.percentage).toFixed(1)}%</p>
+                      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "19px", fontWeight: 900, color: AIRDROP_COLORS[d.status], margin: "0 0 1px" }}>
+                        {d.player_count}
+                      </p>
+                      <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "11px", color: C.muted, margin: 0 }}>
+                        {parseFloat(d.percentage).toFixed(1)}%
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -380,35 +685,45 @@ function App() {
 
             {/* Rewards vs Fees donut */}
             {chartData && (
-              <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "20px", padding: "26px", flex: "1", minWidth: "270px" }}>
-                <h3 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(8px,1.1vw,10px)", margin: "0 0 18px", color: C.text }}>
-                  🍪 Rewards vs Fees
-                </h3>
+              <div className="parchment-card chart-card" style={{ borderRadius: "20px", padding: "28px", flex: "1", minWidth: "270px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${C.borderGold}, transparent)` }} />
+                <SectionTitle sub="Where the ETH went">
+                  Rewards vs. Fees
+                </SectionTitle>
                 <ResponsiveContainer width="100%" height={210}>
                   <PieChart>
-                    <Pie data={[
-                      { name: "Reward Pool", value: chartData.rewardPool },
-                      { name: "Total Fees",  value: chartData.totalFees },
-                    ]} cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={4} dataKey="value">
-                      <Cell fill={C.accent} />
-                      <Cell fill={C.orange} />
+                    <Pie
+                      data={[
+                        { name: "Reward Pool", value: chartData.rewardPool },
+                        { name: "Total Fees",  value: chartData.totalFees },
+                      ]}
+                      cx="50%" cy="50%" innerRadius={58} outerRadius={92}
+                      paddingAngle={5} dataKey="value" stroke="none"
+                    >
+                      <Cell fill={C.goldLight} />
+                      <Cell fill={C.copper} />
                     </Pie>
-                    <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.text }}
-                      formatter={(v) => v.toFixed(3) + " ETH"} />
+                    <Tooltip
+                      contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.cream, fontFamily: "'Crimson Pro', serif" }}
+                      formatter={(v) => [v.toFixed(3) + " ETH"]}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", marginTop: "10px" }}>
+                <Ornament style={{ margin: "4px 0 14px" }} />
+                <div style={{ display: "flex", justifyContent: "center", gap: "22px", flexWrap: "wrap" }}>
                   {[
-                    { label: "Reward Pool", val: chartData.rewardPool, col: C.accent },
-                    { label: "Reg Fees",    val: chartData.regFees,    col: C.orange },
-                    { label: "Gas Fees",    val: chartData.gasFees,    col: C.orange },
+                    { label: "Reward Pool", val: chartData.rewardPool, col: C.goldLight },
+                    { label: "Reg Fees",    val: chartData.regFees,    col: C.amber },
+                    { label: "Gas Fees",    val: chartData.gasFees,    col: C.copper },
                   ].map(({ label, val, col }) => (
                     <div key={label} style={{ textAlign: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "4px" }}>
-                        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: col }} />
-                        <span style={{ fontSize: "10px", color: C.muted }}>{label}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", justifyContent: "center" }}>
+                        <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: col }} />
+                        <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "12px", color: C.muted }}>{label}</span>
                       </div>
-                      <p style={{ fontSize: "17px", fontWeight: "900", color: col, margin: 0 }}>{val.toFixed(2)} ETH</p>
+                      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "19px", fontWeight: 900, color: col, margin: 0 }}>
+                        {val.toFixed(2)}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -416,38 +731,54 @@ function App() {
             )}
           </section>
 
-          {/* WALLET LOOKUP */}
-          <section style={{ marginBottom: "36px", animation: "fadeUp 0.8s ease-out" }}>
-            <h3 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(9px,1.2vw,11px)", margin: "0 0 14px", color: C.text }}>
-              🔍 Wallet Lookup
-            </h3>
-            <input
-              type="text"
-              placeholder="Enter wallet address..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input"
-              style={{
-                padding: "13px 18px", width: "min(420px, 100%)",
-                borderRadius: "12px", border: `1px solid ${C.border}`,
-                background: C.card, color: C.text,
-                fontSize: "13px", fontFamily: "monospace",
-              }}
-            />
+          {/* ── WALLET LOOKUP ─────────────────────────────────────────────── */}
+          <section className="section-enter" style={{ marginBottom: "40px", animationDelay: "0.26s" }}>
+            <SectionTitle sub="Search any baker's wallet to see their outcome">
+              Baker Lookup
+            </SectionTitle>
+            <div style={{ position: "relative", display: "inline-block", width: "min(460px, 100%)" }}>
+              <span style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", color: C.muted, fontSize: "14px", pointerEvents: "none" }}>
+                🔍
+              </span>
+              <input
+                type="text"
+                placeholder="Enter a wallet address..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="search-input"
+                style={{
+                  padding: "13px 18px 13px 40px",
+                  width: "100%",
+                  borderRadius: "10px",
+                  border: `1px solid ${C.border}`,
+                  background: C.card,
+                  color: C.cream,
+                  fontSize: "13px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  backgroundImage: `radial-gradient(ellipse at top left, rgba(201,124,10,0.04) 0%, transparent 60%)`,
+                }}
+              />
+            </div>
 
             {search && (
-              <div style={{ marginTop: "10px" }}>
+              <div style={{ marginTop: "12px" }}>
                 {filtered.length === 0 ? (
-                  <p style={{ color: C.muted, fontSize: "14px" }}>No address found</p>
+                  <p style={{ fontFamily: "'Crimson Pro', serif", fontStyle: "italic", color: C.muted, fontSize: "15px" }}>
+                    No baker found with that address.
+                  </p>
                 ) : (
                   filtered.slice(0, 20).map((user, i) => {
                     const au = airdropData.find(a => a.user_address === user.user_address) || user;
                     return (
-                      <div key={i} onClick={() => setSelectedUser(au)} className="row-item"
-                        style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 16px", marginBottom: "5px", background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", cursor: "pointer" }}>
-                        <span style={{ fontSize: "11px", color: C.muted, minWidth: "28px" }}>#{user.rank}</span>
-                        <span style={{ flex: 1, fontSize: "12px", fontFamily: "monospace", color: C.text, wordBreak: "break-all" }}>{user.user_address}</span>
-                        <span style={{ fontSize: "12px", fontWeight: "700", color: C.orange, whiteSpace: "nowrap" }}>{user.total_eth_spent.toFixed(3)} ETH</span>
+                      <div key={i} onClick={() => setSelectedUser(au)} className="row-item parchment-card"
+                        style={{ display: "flex", alignItems: "center", gap: "10px", padding: "13px 17px", marginBottom: "6px", borderRadius: "10px", cursor: "pointer", position: "relative" }}>
+                        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "12px", color: C.muted, minWidth: "30px" }}>#{user.rank}</span>
+                        <span style={{ flex: 1, fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: C.textSoft, wordBreak: "break-all" }}>
+                          {user.user_address}
+                        </span>
+                        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "13px", fontWeight: 700, color: C.goldLight, whiteSpace: "nowrap" }}>
+                          {user.total_eth_spent.toFixed(3)} ETH
+                        </span>
                         <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: getStatusColor(au), flexShrink: 0 }} />
                       </div>
                     );
@@ -457,16 +788,27 @@ function App() {
             )}
           </section>
 
-          {/* TOP MINTERS TABLE */}
-          <section style={{ marginBottom: "40px", animation: "fadeUp 0.9s ease-out" }}>
-            <h3 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(9px,1.2vw,11px)", margin: "0 0 14px", color: C.text }}>
-              🏆 Top Minters
-            </h3>
-            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "16px", overflow: "hidden" }}>
-              {/* header row */}
-              <div style={{ display: "grid", gridTemplateColumns: "44px 1fr 110px 64px 90px", gap: "8px", padding: "10px 18px", borderBottom: `1px solid ${C.border}` }}>
-                {["#", "Address", "ETH Spent", "TXs", "Status"].map((h) => (
-                  <span key={h} style={{ fontSize: "9px", color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
+          {/* ── TOP MINTERS TABLE ─────────────────────────────────────────── */}
+          <section className="section-enter" style={{ marginBottom: "44px", animationDelay: "0.34s" }}>
+            <SectionTitle sub="The top 10 bakers by ETH spent">
+              Baker's Leaderboard
+            </SectionTitle>
+            <div className="parchment-card" style={{ borderRadius: "18px", overflow: "hidden", position: "relative" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${C.borderGold}, transparent)` }} />
+
+              {/* Table header */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "48px 1fr 120px 64px 96px",
+                gap: "8px",
+                padding: "12px 20px",
+                borderBottom: `1px solid ${C.border}`,
+                background: `rgba(201,124,10,0.04)`,
+              }}>
+                {["No.", "Address", "ETH Spent", "Batches", "Status"].map((h) => (
+                  <span key={h} style={{ fontFamily: "'Crimson Pro', serif", fontSize: "10px", color: C.muted, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                    {h}
+                  </span>
                 ))}
               </div>
 
@@ -475,18 +817,39 @@ function App() {
                 const sc = getStatusColor(au);
                 const rankBadge = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${user.rank}`;
                 const statusText = !au ? "—" : au.airdrop_received === 0 ? "Rugged" : au.net_profit > 0 ? "Recov." : "Loss";
+
                 return (
-                  <div key={i} onClick={() => setSelectedUser(au || user)} className="row-item"
-                    style={{ display: "grid", gridTemplateColumns: "44px 1fr 110px 64px 90px", gap: "8px", padding: "13px 18px", cursor: "pointer", borderBottom: i < 9 ? `1px solid ${C.border}` : "none", alignItems: "center" }}>
-                    <span style={{ fontSize: "13px", color: i < 3 ? C.orange : C.muted, fontWeight: "700" }}>{rankBadge}</span>
-                    <span style={{ fontSize: "12px", fontFamily: "monospace", color: C.text }}>
-                      {user.user_address.slice(0, 8)}...{user.user_address.slice(-6)}
+                  <div key={i}
+                    onClick={() => setSelectedUser(au || user)}
+                    className="row-item"
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "48px 1fr 120px 64px 96px",
+                      gap: "8px",
+                      padding: "14px 20px",
+                      cursor: "pointer",
+                      borderBottom: i < 9 ? `1px solid ${C.border}` : "none",
+                      alignItems: "center",
+                      background: "transparent",
+                      border: "1px solid transparent",
+                    }}>
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "14px", color: i < 3 ? C.goldLight : C.muted, fontWeight: 700 }}>
+                      {rankBadge}
                     </span>
-                    <span style={{ fontSize: "13px", fontWeight: "700", color: C.accent }}>{user.total_eth_spent.toFixed(3)} ETH</span>
-                    <span style={{ fontSize: "12px", color: C.muted }}>{user.tx_count}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                      <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: sc, flexShrink: 0 }} />
-                      <span style={{ fontSize: "10px", color: sc, fontWeight: "600" }}>{statusText}</span>
+                    <span style={{ fontSize: "12px", fontFamily: "'JetBrains Mono', monospace", color: C.textSoft }}>
+                      {user.user_address.slice(0, 8)}…{user.user_address.slice(-6)}
+                    </span>
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "14px", fontWeight: 700, color: C.goldLight }}>
+                      {user.total_eth_spent.toFixed(3)} ETH
+                    </span>
+                    <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "13px", color: C.muted }}>
+                      {user.tx_count}
+                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: sc, flexShrink: 0 }} />
+                      <span style={{ fontFamily: "'Crimson Pro', serif", fontSize: "12px", color: sc, fontWeight: 600 }}>
+                        {statusText}
+                      </span>
                     </div>
                   </div>
                 );
@@ -494,24 +857,42 @@ function App() {
             </div>
           </section>
 
-          {/* BAR CHART */}
-          <section style={{ animation: "fadeUp 1s ease-out" }}>
-            <h3 style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "clamp(9px,1.2vw,11px)", margin: "0 0 14px", color: C.text }}>
-              📊 Top ETH Spenders
-            </h3>
-            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "20px", padding: "24px" }}>
-              <div style={{ width: "100%", height: "clamp(180px,28vw,280px)" }}>
+          {/* ── BAR CHART ────────────────────────────────────────────────── */}
+          <section className="section-enter" style={{ animationDelay: "0.42s" }}>
+            <SectionTitle sub="ETH spent across the top 10 bakers">
+              Daily Totals
+            </SectionTitle>
+            <div className="parchment-card chart-card" style={{ borderRadius: "20px", padding: "26px 22px", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${C.borderGold}, transparent)` }} />
+              <div style={{ width: "100%", height: "clamp(190px,28vw,285px)" }}>
                 <ResponsiveContainer>
-                  <BarChart data={data.slice(0, 10)} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                    <XAxis dataKey="user_address" tickFormatter={(a) => a.slice(0, 6)} tick={{ fill: C.muted, fontSize: 10 }} axisLine={{ stroke: C.border }} tickLine={false} />
-                    <YAxis tick={{ fill: C.muted, fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.text }}
-                      formatter={(v) => [v.toFixed(3) + " ETH", "ETH Spent"]}
-                      labelFormatter={(v) => `${v.slice(0, 6)}...${v.slice(-4)}`}
-                      cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                  <BarChart data={data.slice(0, 10)} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
+                    <XAxis
+                      dataKey="user_address"
+                      tickFormatter={(a) => a.slice(0, 6)}
+                      tick={{ fill: C.muted, fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }}
+                      axisLine={{ stroke: C.border }}
+                      tickLine={false}
                     />
-                    <Bar dataKey="total_eth_spent" fill={C.accent} radius={[6, 6, 0, 0]} />
+                    <YAxis
+                      tick={{ fill: C.muted, fontSize: 10, fontFamily: "'Crimson Pro', serif" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "10px", color: C.cream, fontFamily: "'Crimson Pro', serif" }}
+                      formatter={(v) => [v.toFixed(3) + " ETH", "Spent"]}
+                      labelFormatter={(v) => `${v.slice(0, 6)}…${v.slice(-4)}`}
+                      cursor={{ fill: "rgba(201,124,10,0.05)" }}
+                    />
+                    <Bar dataKey="total_eth_spent" radius={[5, 5, 0, 0]}>
+                      {data.slice(0, 10).map((_, i) => (
+                        <Cell
+                          key={i}
+                          fill={i === 0 ? C.goldLight : i === 1 ? C.amber : i === 2 ? C.gold : C.copper}
+                        />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -520,14 +901,37 @@ function App() {
         </main>
       )}
 
-      {/* FOOTER */}
-      <footer style={{ textAlign: "center", padding: "28px", borderTop: `1px solid ${C.border}` }}>
-        <a href="https://x.com/0xAirr" target="_blank" rel="noopener noreferrer"
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
+      <footer style={{
+        textAlign: "center",
+        padding: "30px 20px",
+        borderTop: `1px solid ${C.border}`,
+        background: `${C.bgDeep}`,
+      }}>
+        <Ornament style={{ marginBottom: "14px" }} />
+        <a
+          href="https://x.com/0xAirr"
+          target="_blank"
+          rel="noopener noreferrer"
           className="footer-link"
-          style={{ fontFamily: "'Press Start 2P', cursive", fontSize: "10px", color: C.muted, textDecoration: "none" }}>
+          style={{
+            fontFamily: "'Crimson Pro', serif",
+            fontStyle: "italic",
+            fontSize: "14px",
+            color: C.muted,
+            textDecoration: "none",
+            letterSpacing: "0.04em",
+          }}
+        >
           @0xAirr
         </a>
+        <p style={{ fontFamily: "'Crimson Pro', serif", fontSize: "11px", color: C.border, margin: "10px 0 0", letterSpacing: "0.08em" }}>
+          RUGPULL BAKERY · SEASON I
+        </p>
       </footer>
+
+      {/* Bottom accent bar */}
+      <div style={{ height: "3px", background: `linear-gradient(90deg, transparent 0%, ${C.copper} 15%, ${C.goldLight} 50%, ${C.copper} 85%, transparent 100%)` }} />
     </div>
   );
 }
