@@ -3,6 +3,7 @@
   "outputDirectory": "frontend/build",
   "framework": null,
   "routes": [
+    { "src": "/api/(.*)", "dest": "https://rugpull-bakery.onrender.com/$1" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
